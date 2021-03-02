@@ -190,7 +190,7 @@ const ViewImagesBtn: React.FC<unknown> = () => {
             selectedSubBreed,
           });
           setPagination({
-            // 20 is the size of the batch
+            // 10 is the size of the batch
             totalPageNumber: Math.ceil(data.message.length / 10),
             src: data.message,
             imagesToView: [],
@@ -207,7 +207,7 @@ const ViewImagesBtn: React.FC<unknown> = () => {
             selectedBreed,
           });
           setPagination({
-            // 20 is the size of the batch
+            // 10 is the size of the batch
             totalPageNumber: Math.ceil(data.message.length / 10),
             src: data.message,
             imagesToView: [],
@@ -237,11 +237,17 @@ const ShowImages: React.FC<unknown> = () => {
   } = useContext(HomePageContext);
   const [trackBatch, setTrackBatch] = useState<{ [key: number]: string[] }>();
   const [isLoadMore, setIsLoadMore] = useState<boolean>(false);
+  const [data, setData] = useState<string[]>([]);
 
+  // added Scroll event on Mount
+  // if scroll to the bottom, check there's more data. If so, load more!
   useEffect(() => {
     const callback = () => {
-      const body = document.querySelector('body');
-      if (body && body.getBoundingClientRect().bottom <= window.innerHeight) {
+      const container = document.getElementById('images-container');
+      if (
+        container &&
+        container.getBoundingClientRect().bottom <= window.innerHeight
+      ) {
         setIsLoadMore(true);
       }
     };
@@ -250,18 +256,22 @@ const ShowImages: React.FC<unknown> = () => {
     return () => window.removeEventListener('scroll', callback);
   }, []);
 
+  // Loading more data by increasing currentPage
   useEffect(() => {
-    if (isLoadMore) {
+    if (isLoadMore && pagination.src.length) {
       setPagination((prev) => ({ ...prev, currentPage: prev.currentPage + 1 }));
     }
     return () => setIsLoadMore(false);
   }, [isLoadMore]);
 
+  // Adding more data into display!
   useEffect(() => {
-    const body = document.querySelector('body');
-    console.log(body?.getBoundingClientRect().bottom);
-  }, []);
+    if (trackBatch?.[pagination.currentPage]) {
+      setData((prev) => [...prev, ...trackBatch[pagination.currentPage]]);
+    }
+  }, [pagination.currentPage, trackBatch]);
 
+  // Adding more batches of data into the tracking in order to load
   useEffect(() => {
     if (pagination.src.length) {
       const prevPosition =
@@ -271,38 +281,35 @@ const ShowImages: React.FC<unknown> = () => {
 
       const incomingBatch = pagination.src.slice(prevPosition, nextPosition);
 
-      setTrackBatch((prev) => ({
-        ...prev,
-        [pagination.currentPage]: [...incomingBatch],
-      }));
+      if (incomingBatch.length) {
+        setTrackBatch((prev) => ({
+          ...prev,
+          [pagination.currentPage]: [...incomingBatch],
+        }));
+      }
     }
   }, [pagination]);
 
   // reset when any of those filters changes
-  useEffect(() => () => setTrackBatch({}), [
-    selectedBreed,
-    selectedSubBreed,
-    NumberOfImagesToShowSelect,
-  ]);
-
-  // DEBUG
-  useEffect(() => {
-    console.log('pagination', pagination);
-  }, [pagination]);
-
-  useEffect(() => {
-    console.log('trackBatch', trackBatch);
-  }, [trackBatch]);
+  useEffect(
+    () => () => {
+      setTrackBatch({});
+      setData([]);
+    },
+    [selectedBreed, selectedSubBreed, NumberOfImagesToShowSelect]
+  );
 
   return (
-    <div className="grid grid-cols-4 gap-4">
-      {trackBatch?.[pagination.currentPage]?.map((image, index) => (
-        <img
-          key={image}
-          src={image}
-          alt={`batch-${pagination.currentPage}-${index}`}
-        />
-      ))}
+    <div id="images-container">
+      <div className="grid grid-cols-4 gap-4">
+        {data.map((image, index) => (
+          <img
+            key={image}
+            src={image}
+            alt={`batch-${pagination.currentPage}-${index}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };

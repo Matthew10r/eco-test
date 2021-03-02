@@ -20,8 +20,6 @@ interface GetBreedDetailResponse {
   status: string;
 }
 
-export const testing = () => console.log('This is a test!');
-
 export const getAllBreeds = async (): Promise<
   AxiosResponse<GetAllBreedsResponse>
 > => {
