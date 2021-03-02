@@ -17,8 +17,11 @@ interface ContextType {
   pagination: {
     imagesToView: string[];
     totalPageNumber: number;
+    currentPage: number;
+    src: string[];
   };
   missingDataFields: (keyof MissingDataFields)[];
+  validated: boolean;
   setSelectedBreed: React.Dispatch<React.SetStateAction<string>>;
   setSelectedSubBreed?: React.Dispatch<React.SetStateAction<string>>;
   setNumberOfImagesToShow: React.Dispatch<React.SetStateAction<number>>;
@@ -27,6 +30,8 @@ interface ContextType {
     React.SetStateAction<{
       imagesToView: string[];
       totalPageNumber: number;
+      currentPage: number;
+      src: string[];
     }>
   >;
   setBeforeFetchRandomImages: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,8 +44,11 @@ export const Context = createContext<ContextType>({
   pagination: {
     imagesToView: [],
     totalPageNumber: 0,
+    currentPage: 1,
+    src: [],
   },
   missingDataFields: [],
+  validated: false,
   setSelectedBreed: () => {},
   setNumberOfImagesToShow: () => {},
   setBreedsMap: () => {},
@@ -53,6 +61,7 @@ const ContextProvider: React.FC<unknown> = ({ children }) => {
     beforeFetchRandomImages,
     setBeforeFetchRandomImages,
   ] = useState<boolean>(false);
+  const [validated, setValidated] = useState<boolean>(false);
   const [missingDataFields, setMissingDataFields] = useState<
     (keyof MissingDataFields)[]
   >([]);
@@ -63,9 +72,13 @@ const ContextProvider: React.FC<unknown> = ({ children }) => {
   const [pagination, setPagination] = useState<{
     imagesToView: string[];
     totalPageNumber: number;
+    src: string[];
+    currentPage: number;
   }>({
     imagesToView: [],
     totalPageNumber: 0,
+    src: [],
+    currentPage: 1,
   });
 
   // Filter Fields Validation
@@ -75,7 +88,7 @@ const ContextProvider: React.FC<unknown> = ({ children }) => {
       if (
         breedsMap &&
         selectedBreed &&
-        breedsMap[selectedBreed] &&
+        breedsMap[selectedBreed].length &&
         !selectedSubBreed
       ) {
         _missingDataFields.push('SubBreedSelect');
@@ -83,16 +96,21 @@ const ContextProvider: React.FC<unknown> = ({ children }) => {
       if (!selectedBreed) {
         _missingDataFields.push('BreedSelect');
       }
-      if (!numberOfImagesToShow) {
+      if (!numberOfImagesToShow && numberOfImagesToShow !== 0) {
         _missingDataFields.push('NumberOfImagesToShowSelect');
       }
 
       if (_missingDataFields.length) {
         setMissingDataFields([..._missingDataFields]);
+      } else {
+        setValidated(true);
       }
     }
 
-    return () => setBeforeFetchRandomImages(false);
+    return () => {
+      setBeforeFetchRandomImages(false);
+      setValidated(false);
+    };
   }, [beforeFetchRandomImages]);
 
   // Remove error after user has input value into fields
@@ -133,6 +151,7 @@ const ContextProvider: React.FC<unknown> = ({ children }) => {
         numberOfImagesToShow,
         pagination,
         missingDataFields,
+        validated,
         setSelectedBreed,
         setSelectedSubBreed,
         setNumberOfImagesToShow,

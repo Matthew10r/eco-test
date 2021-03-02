@@ -24,7 +24,10 @@ const Select: React.FC<Props> = ({
       setDisabled(false);
     }
 
-    return () => setDisabled(true);
+    return () => {
+      setDisabled(true);
+      setIsOpenDropdown(false);
+    };
   }, [options]);
 
   return (
