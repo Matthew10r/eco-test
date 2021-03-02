@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface Props {
   onClick: (target: string | number) => void;
-  selectedOption: string;
+  selectedOption: string | number;
   label: string;
   options: string[] | number[] | undefined;
 }
@@ -21,6 +21,8 @@ const Select: React.FC<Props> = ({
     if (options?.length) {
       setDisabled(false);
     }
+
+    return () => setDisabled(true);
   }, [options]);
 
   return (
@@ -71,6 +73,7 @@ const Select: React.FC<Props> = ({
               {(options as string[] | number[]).map(
                 (option: string | number) => (
                   <li
+                    key={option}
                     role="option"
                     aria-selected={option === selectedOption}
                     onClick={() => {
