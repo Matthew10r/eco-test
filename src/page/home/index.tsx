@@ -12,9 +12,12 @@ import HomePageContextProvider, {
 } from '@/providers/homePageProvider';
 
 const BreedSelect: React.FC<unknown> = () => {
-  const { setBreedsMap, selectedBreed, setSelectedBreed } = useContext(
-    HomePageContext
-  );
+  const {
+    setBreedsMap,
+    selectedBreed,
+    setSelectedBreed,
+    missingDataFields,
+  } = useContext(HomePageContext);
   const [options, setOptions] = useState<string[]>();
   useEffect(() => {
     (async () => {
@@ -28,6 +31,9 @@ const BreedSelect: React.FC<unknown> = () => {
 
   return (
     <Select
+      className={
+        missingDataFields.includes('BreedSelect') ? 'border-red-700' : ''
+      }
       onClick={(target) => setSelectedBreed(target as string)}
       selectedOption={selectedBreed}
       label="Breed"
@@ -42,6 +48,7 @@ const SubBreedSelect: React.FC<unknown> = () => {
     selectedSubBreed,
     selectedBreed,
     setSelectedSubBreed,
+    missingDataFields,
   } = useContext(HomePageContext);
   const [options, setOptions] = useState<string[]>();
 
@@ -63,6 +70,9 @@ const SubBreedSelect: React.FC<unknown> = () => {
 
   return (
     <Select
+      className={
+        missingDataFields.includes('SubBreedSelect') ? 'border-red-700' : ''
+      }
       onClick={(target) =>
         setSelectedSubBreed && setSelectedSubBreed(target as string)
       }
@@ -80,6 +90,7 @@ const NumberOfImagesToShowSelect: React.FC<unknown> = () => {
     selectedSubBreed,
     setNumberOfImagesToShow,
     numberOfImagesToShow,
+    missingDataFields,
   } = useContext(HomePageContext);
   const [options, setOptions] = useState<number[]>();
 
@@ -100,6 +111,11 @@ const NumberOfImagesToShowSelect: React.FC<unknown> = () => {
 
   return (
     <Select
+      className={
+        missingDataFields.includes('NumberOfImagesToShowSelect')
+          ? 'border-red-700'
+          : ''
+      }
       onClick={(target) => setNumberOfImagesToShow(target as number)}
       selectedOption={numberOfImagesToShow}
       label="Number of Images"
@@ -108,17 +124,27 @@ const NumberOfImagesToShowSelect: React.FC<unknown> = () => {
   );
 };
 
-const HomePage: React.FC<unknown> = () => {
-  console.log('This is Home Page!');
+const ViewImagesBtn: React.FC<unknown> = () => {
+  const { setBeforeFetchRandomImages } = useContext(HomePageContext);
   return (
-    <HomePageContextProvider>
-      <div className="grid grid-flow-col grid-cols-4 grid-rows-1 gap-4">
-        <BreedSelect />
-        <SubBreedSelect />
-        <NumberOfImagesToShowSelect />
-      </div>
-    </HomePageContextProvider>
+    <button
+      onClick={() => setBeforeFetchRandomImages(true)}
+      className="inline-flex justify-center py-2 px-4 border border-transparent text-lg items-center shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    >
+      View Image
+    </button>
   );
 };
+
+const HomePage: React.FC<unknown> = () => (
+  <HomePageContextProvider>
+    <div className="grid grid-flow-col grid-cols-4 grid-rows-1 gap-4">
+      <BreedSelect />
+      <SubBreedSelect />
+      <NumberOfImagesToShowSelect />
+      <ViewImagesBtn />
+    </div>
+  </HomePageContextProvider>
+);
 
 export default HomePage;

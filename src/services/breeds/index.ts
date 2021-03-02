@@ -9,6 +9,8 @@ interface GetAllBreedsResponse {
   status: string;
 }
 interface GetBreedDetailsParams {
+  type?: 'filter' | 'random';
+  imagesToShow?: number;
   selectedBreed: string;
   selectedSubBreed?: string;
 }
@@ -28,6 +30,8 @@ export const getAllBreeds = async (): Promise<
 };
 
 export const getBreedDetails = async ({
+  type = 'filter',
+  imagesToShow = 0,
   selectedBreed,
   selectedSubBreed,
 }: GetBreedDetailsParams): Promise<AxiosResponse<GetBreedDetailResponse>> => {
@@ -35,10 +39,16 @@ export const getBreedDetails = async ({
 
   if (selectedSubBreed && selectedSubBreed) {
     result = await Breeds.get(
-      `/breed/${selectedBreed}/${selectedSubBreed}/images`
+      `/breed/${selectedBreed}/${selectedSubBreed}/images${
+        type === 'random' ? `/random/${imagesToShow}` : ''
+      }`
     );
   } else {
-    result = await Breeds.get(`/breed/${selectedBreed}/images`);
+    result = await Breeds.get(
+      `/breed/${selectedBreed}/images${
+        type === 'random' ? `/random/${imagesToShow}` : ''
+      }`
+    );
   }
 
   return result;

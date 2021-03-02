@@ -5,6 +5,7 @@ interface Props {
   selectedOption: string | number;
   label: string;
   options: string[] | number[] | undefined;
+  className?: string;
 }
 
 const Select: React.FC<Props> = ({
@@ -12,6 +13,7 @@ const Select: React.FC<Props> = ({
   options,
   selectedOption,
   onClick,
+  className,
 }) => {
   const [isOpenDropdown, setIsOpenDropdown] = useState<boolean>(false);
   const [onHoverOption, setOnHoverOption] = useState<string | number | null>();
@@ -36,7 +38,9 @@ const Select: React.FC<Props> = ({
           aria-haspopup="listbox"
           aria-expanded="true"
           aria-labelledby="listbox-label"
-          className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 min-h-selectBox"
+          className={`${
+            className ? `${className}` : ''
+          } relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 min-h-selectBox`}
         >
           <span className="flex items-center">
             <span className="block truncate">{selectedOption}</span>
