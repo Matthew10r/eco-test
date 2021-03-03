@@ -32,24 +32,18 @@ const BreedSelect: React.FC<unknown> = () => {
         setOptions(Object.keys(data.message));
       }
     })();
+  }, []);
 
-    // Clear all selected values when component unmount!
-    return () => {
-      setSelectedBreed('');
+  // reset all other filter when the selected breed filter change ( This is the main filter! )
+  useEffect(
+    () => () => {
       if (setSelectedSubBreed) {
         setSelectedSubBreed('');
       }
       setNumberOfImagesToShow(0);
-    };
-  }, []);
-
-  // reset all other filter when the selected breed filter change ( This is the main filter! )
-  useEffect(() => {
-    if (setSelectedSubBreed) {
-      setSelectedSubBreed('');
-    }
-    setNumberOfImagesToShow(0);
-  }, [selectedBreed]);
+    },
+    [selectedBreed]
+  );
 
   return (
     <Select
@@ -72,8 +66,12 @@ const SubBreedSelect: React.FC<unknown> = () => {
     setSelectedSubBreed,
     missingDataFields,
   } = useContext(HomePageContext);
+
   const [options, setOptions] = useState<string[]>();
 
+  // check to see if the main Breed has been selected
+  // if selected, check if that selected breed has sub breed
+  // if so, let user select sub breed
   useEffect(() => {
     if (selectedBreed && breedsMap) {
       if (breedsMap?.[selectedBreed].length) {
@@ -95,9 +93,11 @@ const SubBreedSelect: React.FC<unknown> = () => {
       className={
         missingDataFields.includes('SubBreedSelect') ? 'border-red-500' : ''
       }
-      onClick={(target) =>
-        setSelectedSubBreed && setSelectedSubBreed(target as string)
-      }
+      onClick={(target) => {
+        if (setSelectedSubBreed) {
+          setSelectedSubBreed(target as string);
+        }
+      }}
       selectedOption={selectedSubBreed || ''}
       label="Sub Breed"
       options={options}
@@ -109,11 +109,11 @@ const NumberOfImagesToShowSelect: React.FC<unknown> = () => {
   const {
     selectedBreed,
     selectedSubBreed,
-    setSelectedSubBreed,
     setNumberOfImagesToShow,
     numberOfImagesToShow,
     missingDataFields,
   } = useContext(HomePageContext);
+
   const [options, setOptions] = useState<number[]>();
 
   // Only the Master Category
@@ -127,9 +127,6 @@ const NumberOfImagesToShowSelect: React.FC<unknown> = () => {
 
     return () => {
       setNumberOfImagesToShow(0);
-      if (selectedSubBreed && setSelectedSubBreed) {
-        setSelectedSubBreed('');
-      }
     };
   }, [selectedBreed]);
 
@@ -147,9 +144,6 @@ const NumberOfImagesToShowSelect: React.FC<unknown> = () => {
 
     return () => {
       setNumberOfImagesToShow(0);
-      if (selectedSubBreed && setSelectedSubBreed) {
-        setSelectedSubBreed('');
-      }
     };
   }, [selectedSubBreed]);
 
@@ -189,12 +183,15 @@ const ViewImagesBtn: React.FC<unknown> = () => {
             selectedBreed,
             selectedSubBreed,
           });
-          setPagination({
-            // 10 is the size of the batch
-            totalPageNumber: Math.ceil(data.message.length / 10),
-            src: data.message,
-            currentPage: data.message.length ? 1 : 0,
-          });
+
+          if (data.message.length) {
+            setPagination({
+              // 10 is the size of the batch
+              totalPageNumber: Math.ceil(data.message.length / 10),
+              src: data.message,
+              currentPage: 1,
+            });
+          }
         } else if (
           breedsMap &&
           selectedBreed &&
@@ -205,12 +202,15 @@ const ViewImagesBtn: React.FC<unknown> = () => {
             imagesToShow: numberOfImagesToShow,
             selectedBreed,
           });
-          setPagination({
-            // 10 is the size of the batch
-            totalPageNumber: Math.ceil(data.message.length / 10),
-            src: data.message,
-            currentPage: data.message.length ? 1 : 0,
-          });
+
+          if (data.message.length) {
+            setPagination({
+              // 10 is the size of the batch
+              totalPageNumber: Math.ceil(data.message.length / 10),
+              src: data.message,
+              currentPage: 1,
+            });
+          }
         }
       }
     })();
@@ -258,6 +258,7 @@ const ShowImages: React.FC<unknown> = () => {
         setIsLoadMore(true);
       }
     };
+
     window.addEventListener('scroll', debounce(callback, 800));
 
     return () => window.removeEventListener('scroll', callback);
@@ -314,7 +315,7 @@ const ShowImages: React.FC<unknown> = () => {
   );
 
   return (
-    <div id="images-container" className="h-screen">
+    <div id="images-container">
       <div className="grid grid-cols-4 gap-4">
         {data.map((image, index) => (
           <img
