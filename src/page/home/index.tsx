@@ -193,7 +193,6 @@ const ViewImagesBtn: React.FC<unknown> = () => {
             // 10 is the size of the batch
             totalPageNumber: Math.ceil(data.message.length / 10),
             src: data.message,
-            imagesToView: [],
             currentPage: data.message.length ? 1 : 0,
           });
         } else if (
@@ -210,12 +209,19 @@ const ViewImagesBtn: React.FC<unknown> = () => {
             // 10 is the size of the batch
             totalPageNumber: Math.ceil(data.message.length / 10),
             src: data.message,
-            imagesToView: [],
             currentPage: data.message.length ? 1 : 0,
           });
         }
       }
     })();
+
+    return () => {
+      setPagination({
+        totalPageNumber: 0,
+        src: [],
+        currentPage: 0,
+      });
+    };
   }, [validated]);
 
   return (
@@ -234,6 +240,7 @@ const ShowImages: React.FC<unknown> = () => {
     setPagination,
     selectedSubBreed,
     selectedBreed,
+    numberOfImagesToShow,
   } = useContext(HomePageContext);
   const [trackBatch, setTrackBatch] = useState<{ [key: number]: string[] }>();
   const [isLoadMore, setIsLoadMore] = useState<boolean>(false);
@@ -251,18 +258,22 @@ const ShowImages: React.FC<unknown> = () => {
         setIsLoadMore(true);
       }
     };
-    window.addEventListener('scroll', debounce(callback, 500));
+    window.addEventListener('scroll', debounce(callback, 800));
 
     return () => window.removeEventListener('scroll', callback);
   }, []);
 
   // Loading more data by increasing currentPage
   useEffect(() => {
-    if (isLoadMore && pagination.src.length) {
+    if (
+      isLoadMore &&
+      pagination.src.length &&
+      pagination.totalPageNumber !== pagination.currentPage
+    ) {
       setPagination((prev) => ({ ...prev, currentPage: prev.currentPage + 1 }));
     }
     return () => setIsLoadMore(false);
-  }, [isLoadMore]);
+  }, [pagination, isLoadMore]);
 
   // Adding more data into display!
   useEffect(() => {
@@ -274,10 +285,8 @@ const ShowImages: React.FC<unknown> = () => {
   // Adding more batches of data into the tracking in order to load
   useEffect(() => {
     if (pagination.src.length) {
-      const prevPosition =
-        pagination.currentPage === 1 ? 0 : pagination.currentPage * 10;
-      const nextPosition =
-        pagination.currentPage === 1 ? 10 : pagination.currentPage * 10 + 10;
+      const prevPosition = pagination.currentPage * 10 - 10;
+      const nextPosition = pagination.currentPage * 10;
 
       const incomingBatch = pagination.src.slice(prevPosition, nextPosition);
 
@@ -288,19 +297,24 @@ const ShowImages: React.FC<unknown> = () => {
         }));
       }
     }
-  }, [pagination]);
+  }, [pagination.currentPage]);
 
   // reset when any of those filters changes
   useEffect(
     () => () => {
       setTrackBatch({});
       setData([]);
+      setPagination({
+        totalPageNumber: 0,
+        src: [],
+        currentPage: 0,
+      });
     },
-    [selectedBreed, selectedSubBreed, NumberOfImagesToShowSelect]
+    [selectedBreed, selectedSubBreed, numberOfImagesToShow]
   );
 
   return (
-    <div id="images-container">
+    <div id="images-container" className="h-screen">
       <div className="grid grid-cols-4 gap-4">
         {data.map((image, index) => (
           <img

@@ -15,7 +15,6 @@ interface ContextType {
   selectedSubBreed?: string;
   numberOfImagesToShow: number;
   pagination: {
-    imagesToView: string[];
     totalPageNumber: number;
     currentPage: number;
     src: string[];
@@ -28,7 +27,6 @@ interface ContextType {
   setBreedsMap: React.Dispatch<React.SetStateAction<GetAllBreeds>>;
   setPagination: React.Dispatch<
     React.SetStateAction<{
-      imagesToView: string[];
       totalPageNumber: number;
       currentPage: number;
       src: string[];
@@ -42,7 +40,6 @@ export const Context = createContext<ContextType>({
   selectedBreed: '',
   numberOfImagesToShow: 0,
   pagination: {
-    imagesToView: [],
     totalPageNumber: 0,
     currentPage: 1,
     src: [],
@@ -70,15 +67,13 @@ const ContextProvider: React.FC<unknown> = ({ children }) => {
   const [selectedSubBreed, setSelectedSubBreed] = useState<string>('');
   const [numberOfImagesToShow, setNumberOfImagesToShow] = useState<number>(0);
   const [pagination, setPagination] = useState<{
-    imagesToView: string[];
     totalPageNumber: number;
     src: string[];
     currentPage: number;
   }>({
-    imagesToView: [],
     totalPageNumber: 0,
     src: [],
-    currentPage: 1,
+    currentPage: 0,
   });
 
   // Filter Fields Validation
