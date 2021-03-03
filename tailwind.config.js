@@ -5,6 +5,7 @@ module.exports = {
     extend: {
       minHeight: {
         selectBox: '38px',
+        imagesContainer: '88vh',
       },
     },
   },

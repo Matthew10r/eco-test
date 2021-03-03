@@ -241,6 +241,7 @@ const ShowImages: React.FC<unknown> = () => {
     selectedSubBreed,
     selectedBreed,
     numberOfImagesToShow,
+    validated,
   } = useContext(HomePageContext);
   const [trackBatch, setTrackBatch] = useState<{ [key: number]: string[] }>();
   const [isLoadMore, setIsLoadMore] = useState<boolean>(false);
@@ -311,11 +312,11 @@ const ShowImages: React.FC<unknown> = () => {
         currentPage: 0,
       });
     },
-    [selectedBreed, selectedSubBreed, numberOfImagesToShow]
+    [selectedBreed, selectedSubBreed, numberOfImagesToShow, validated]
   );
 
   return (
-    <div id="images-container">
+    <div id="images-container" className="min-h-imagesContainer">
       <div className="grid grid-cols-4 gap-4">
         {data.map((image, index) => (
           <img

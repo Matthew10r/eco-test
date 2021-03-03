@@ -91,7 +91,7 @@ const ContextProvider: React.FC<unknown> = ({ children }) => {
       if (!selectedBreed) {
         _missingDataFields.push('BreedSelect');
       }
-      if (!numberOfImagesToShow && numberOfImagesToShow !== 0) {
+      if ((selectedBreed || selectedSubBreed) && !numberOfImagesToShow) {
         _missingDataFields.push('NumberOfImagesToShowSelect');
       }
 
